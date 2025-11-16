@@ -84,30 +84,80 @@ function userList() {
 
 function getUserData(user) {
     var user_data = userList();
+    var u = user_data[user];
+    if (!u) return;
 
-    var progresses = '<ol>'; var clears = 0;
+    var progresses = "<ol>";
+    var clears = 0;
 
-    for (var i = 0 ; i < user_data[user].verified.length ; i++) {
-        rank = user_data[user].verified[i] - 1;
+    // Verified clears
+    for (var i = 0; i < u.verified.length; i++) {
+        var rankIndex = u.verified[i] - 1;
+        if (!list[rankIndex]) continue;
         clears++;
-        progresses = progresses + '<li>' + list[rank].name + ' Verified </strong>(#'+(rank+1)+' / UP: '+roundNumber(getUserPoint(rank+1, 100, list[rank].percentToQualify, "144hz")*1, 3)+')<strong></a></li>'
+        progresses +=
+            "<li>" +
+            list[rankIndex].name +
+            " Verified (#" +
+            (rankIndex + 1) +
+            " / UP: " +
+            roundNumber(
+                getUserPoint(
+                    rankIndex + 1,
+                    100,
+                    list[rankIndex].percentToQualify,
+                    "144hz"
+                ) * 1,
+                3
+            ) +
+            ")</li>";
     }
 
-    for (var i = 0 ; i < user_data[user].progress.length ; i++) {
-        progresses = progresses + '<li><a href="'+user_data[user].progress[i].link+'" target="blank_">' + user_data[user].progress[i].map + ' ' + user_data[user].progress[i].progress + '% </strong>(#'+user_data[user].progress[i].rank+' / UP: '+user_data[user].progress[i].score+''+(parseInt(user_data[user].progress[i].hz.replace("hz", "")) >= 120 ? '' : ' / '+user_data[user].progress[i].hz)+')<strong></a></li>'
-        if (user_data[user].progress[i].progress == 100) {
+    // Progress records
+    for (var j = 0; j < u.progress.length; j++) {
+        var p = u.progress[j];
+        progresses +=
+            '<li><a href="' +
+            p.link +
+            '" target="blank_">' +
+            p.map +
+            " " +
+            p.progress +
+            "% (#" +
+            p.rank +
+            " / UP: " +
+            p.score +
+            (parseInt(p.hz.replace("hz", "")) >= 120 ? "" : " / " + p.hz) +
+            ")</a></li>";
+
+        if (p.progress == 100) {
             clears++;
         }
     }
-    progresses = progresses + "</ol>"
+    progresses += "</ol>";
 
-    Swal.fire({
-        title : "#"+(user+1)+" : "+user_data[user].name,
-        html : '<center><strong>Score : '+user_data[user].point + '<br>'+
-            'Best Record : '+user_data[user].highest+'<br>'+
-            'Completed Levels : '+clears+' Level(s)<br>'+
-            '<br>Record List : '+progresses+'<br>'+
-            '</strong></center>'
-    });
+    var container = document.getElementById("user-detail");
+    if (!container) return;
 
+    container.innerHTML =
+        '<div class="adl-user-detail-header">' +
+        "<h2>#" +
+        (user + 1) +
+        " : " +
+        u.name +
+        "</h2>" +
+        "<p><strong>Score:</strong> " +
+        u.point +
+        "</p>" +
+        "<p><strong>Best Record:</strong> " +
+        u.highest +
+        "</p>" +
+        "<p><strong>Completed Levels:</strong> " +
+        clears +
+        " level(s)</p>" +
+        "</div>" +
+        '<div class="adl-user-detail-progress">' +
+        "<h3>Record List</h3>" +
+        progresses +
+        "</div>";
 }
